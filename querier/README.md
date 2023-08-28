@@ -1,17 +1,6 @@
-# CS50 TSE Querier for Lab 6
+# Querier
 ## John Wang (thejohnyw), May 2023
 
-
-```
-****************
-* EXTENSION USED
-****************
-USING 2 LATE DAYS on Querier
-```
-
-All Specs/functionality met
-
-No assumptions made will building querier that isn't described in instructions. No known failures or differences from specified requirements
 
 ### Compilation
 
