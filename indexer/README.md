@@ -1,7 +1,6 @@
-# CS50 TSE Indexer for Lab 5
+#Indexer
 ## John Wang (thejohnyw), May 2023
 
-No assumptions made will building indexer that isn't described in instructions. No known failures or differences from specified implementation
 
 ### Compilation
 
