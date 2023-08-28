@@ -1,7 +1,5 @@
-# CS50 TSE Crawler Lab 4
+# Crawler
 ## John Wang (thejohnyw), April 2023
-
-No assumptions made while building crawler that isn't described in instructions. No known failures or differences from specified implementation
 
 ### Compilation
 
