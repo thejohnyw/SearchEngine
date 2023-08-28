@@ -1,7 +1,5 @@
-# CS50 TSE Common
+# Common methods/structures needed for search engine
 ## John Wang (thejohnyw), May 2023
-
-No assumptions made will building common that isn't described in instructions. No known failures or differences from specified implementation
 
 ### Compilation
 
