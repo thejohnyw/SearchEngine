@@ -1,0 +1,440 @@
+ml () {  module ml "$@"
+}
+module () {  _module_raw "$@" 2>&1
+}
+_module_raw () {  eval `/usr/bin/tclsh8.6 /usr/lib/x86_64-linux-gnu/modulecmd.tcl bash "$@"`;
+ _mlstatus=$?;
+ return $_mlstatus
+}
+# testing.sh - testing script for querier
+# John Wang, CS50, Lab 6 Querier
+# usage: ./testing.sh
+
+# paths of sample crawler and index output directories/files
+dir=/thayerfs/courses/23spring/cosc050/students_files/tse/output
+pageDirectory=$dir/toscrape-2
+index=$dir/toscrape-2.index
+
+# testing to see that errors function
+
+# no args; should get usage message/error
+./querier
+Usage error; Wrong # of args; proper use: ./querier [pageDirectory] [indexFilename]
+
+# only 1 arg; should get usage message/error
+./querier $pageDirectory
+Usage error; Wrong # of args; proper use: ./querier [pageDirectory] [indexFilename]
+
+# too many args; should get usage message/error
+./querier $pageDirectory $index last
+Usage error; Wrong # of args; proper use: ./querier [pageDirectory] [indexFilename]
+
+# invalid index file arg; should get error
+./querier $pageDirectory wrong
+Error: cannot read from indexFilename
+
+# non-readable index file arg; should get error
+touch wrong2
+chmod -r wrong2
+./querier $pageDirectory wrong2
+Error: cannot read from indexFilename
+rm -r wrong2
+
+
+# invalid pagedirectory file arg; should get error
+./querier wrong $index
+Error: pageDirectory isn't one created by crawler
+
+# Testing for correctness
+
+# Test on toscrape with valgrind: show no memory leaks
+valgrind --leak-check=full --show-leak-kinds=all -s ./fuzzquery $index 10 0 | ./querier $pageDirectory $index
+==3813977== Memcheck, a memory error detector
+==3813977== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==3813977== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==3813977== Command: ./fuzzquery /thayerfs/courses/23spring/cosc050/students_files/tse/output/toscrape-2.index 10 0
+==3813977== 
+./fuzzquery: generating 10 queries from 13563 words
+==3813977== 
+==3813977== HEAP SUMMARY:
+==3813977==     in use at exit: 0 bytes in 0 blocks
+==3813977==   total heap usage: 446,435 allocs, 446,435 frees, 372,214,605 bytes allocated
+==3813977== 
+==3813977== All heap blocks were freed -- no leaks are possible
+==3813977== 
+==3813977== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+Your query: inthe and quarters 
+Found 1 docs. Ranked results: 
+score 1  doc 377: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-genius-of-birds_843/index.html
+--------------------------------------------------------------
+Your query: hangs or visited kahneman or beneath shopping 
+Found 11 docs. Ranked results: 
+score 2  doc 204: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/m-train_598/index.html
+score 2  doc 350: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-emerald-mystery_842/index.html
+score 2  doc 451: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/twenties-girl_292/index.html
+score 2  doc 403: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-day-the-crayons-came-home-crayons_241/index.html
+score 1  doc 171: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/night-shift-night-shift-1-20_335/index.html
+score 1  doc 536: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-last-painting-of-sara-de-vos_259/index.html
+score 1  doc 569: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-last-mile-amos-decker-2_754/index.html
+score 1  doc 16: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/worlds-elsewhere-journeys-around-shakespeares-globe_972/index.html
+score 1  doc 249: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-fabric-of-the-cosmos-space-time-and-the-texture-of-reality_572/index.html
+score 1  doc 283: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/kings-folly-the-kinsman-chronicles-1_473/index.html
+score 1  doc 545: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-paris-apartment_612/index.html
+--------------------------------------------------------------
+Your query: nationally holery or predicts 
+Found 2 docs. Ranked results: 
+score 1  doc 220: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/art-and-fear-observations-on-the-perils-and-rewards-of-artmaking_559/index.html
+score 1  doc 246: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-grand-design_405/index.html
+--------------------------------------------------------------
+Your query: endlessly axell conduct or christine or curdled or sorbonne 
+Found 3 docs. Ranked results: 
+score 2  doc 357: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-piece-of-sky-a-grain-of-rice-a-memoir-in-four-meditations_878/index.html
+score 1  doc 576: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-road-to-little-dribbling-adventures-of-an-american-in-britain-notes-from-a-small-island-2_277/index.html
+score 1  doc 367: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/orchestra-of-exiles-the-story-of-bronislaw-huberman-the-israel-philharmonic-and-the-one-thousand-jews-he-saved-from-nazi-horrors_337/index.html
+--------------------------------------------------------------
+Your query: endowment or cosmic lover sketchbook and priest or bfed 
+Found 4 docs. Ranked results: 
+score 2  doc 391: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/higherselfie-wake-up-your-life-free-your-soul-find-your-tribe_957/index.html
+score 2  doc 490: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-death-of-humanity-and-the-case-for-life_932/index.html
+score 1  doc 28: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/olio_984/index.html
+score 1  doc 20: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/black-dust_976/index.html
+--------------------------------------------------------------
+Your query: orientation iceland describe worse or defeating 
+Found 2 docs. Ranked results: 
+score 2  doc 499: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/beowulf_126/index.html
+score 1  doc 394: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/choosing-our-religion-the-spiritual-lives-of-americas-nones_14/index.html
+--------------------------------------------------------------
+Your query: clerks 
+Found 1 docs. Ranked results: 
+score 1  doc 157: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-distant-mirror-the-calamitous-14th-century_652/index.html
+--------------------------------------------------------------
+Your query: arnold streusel or braved 
+Found 2 docs. Ranked results: 
+score 1  doc 19: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/birdsong-a-story-in-pictures_975/index.html
+score 1  doc 150: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-mathews-men-seven-brothers-and-the-war-against-hitlers-u-boats_408/index.html
+--------------------------------------------------------------
+Your query: multiplatform 
+Found 1 docs. Ranked results: 
+score 1  doc 204: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/m-train_598/index.html
+--------------------------------------------------------------
+Your query: patience or nightstruck or bowerbird and antoinette and stances 
+Found 10 docs. Ranked results: 
+score 5  doc 524: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/patience_916/index.html
+score 1  doc 511: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/sequential-art_5/index.html
+score 1  doc 518: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-hate-fairyland-vol-1-madly-ever-after-i-hate-fairyland-compilations-1-5_899/index.html
+score 1  doc 519: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/lumberjanes-vol-3-a-terrible-plan-lumberjanes-9-12_905/index.html
+score 1  doc 520: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/lumberjanes-vol-1-beware-the-kitten-holy-lumberjanes-1-4_906/index.html
+score 1  doc 521: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/lumberjanes-vol-2-friendship-to-the-max-lumberjanes-5-8_907/index.html
+score 1  doc 522: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/orange-the-complete-collection-1-orange-the-complete-collection-1_914/index.html
+score 1  doc 523: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/outcast-vol-1-a-darkness-surrounds-him-outcast-1_915/index.html
+score 1  doc 255: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/young-adult_21/page-2.html
+score 1  doc 377: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-genius-of-birds_843/index.html
+--------------------------------------------------------------
+
+# Test with diff # of tests and seed
+./fuzzquery $index 5 2 | ./querier $pageDirectory $index
+./fuzzquery: generating 5 queries from 13563 words
+Your query: newsboy 
+No matching docs
+--------------------------------------------------------------
+Your query: trophies aab or seat or rise or homosexuals shoulder 
+Found 32 docs. Ranked results: 
+score 6  doc 152: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-rise-and-fall-of-the-third-reich-a-history-of-nazi-germany_454/index.html
+score 5  doc 100: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-rise-of-theodore-roosevelt-theodore-roosevelt-1_276/index.html
+score 2  doc 324: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-torch-is-passed-a-harding-family-story_945/index.html
+score 2  doc 148: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/americas-war-for-the-greater-middle-east-a-military-history_361/index.html
+score 2  doc 153: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-short-history-of-nearly-everything_457/index.html
+score 2  doc 161: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-age-of-genius-the-seventeenth-century-and-the-birth-of-the-modern-mind_929/index.html
+score 2  doc 380: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/algorithms-to-live-by-the-computer-science-of-human-decisions_880/index.html
+score 2  doc 429: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/still-life-with-bread-crumbs_738/index.html
+score 2  doc 436: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-vacationers_863/index.html
+score 1  doc 18: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/americas-cradle-of-quarterbacks-western-pennsylvanias-football-factory-from-johnny-unitas-to-joe-montana_974/index.html
+score 1  doc 279: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-mistake-off-campus-2_851/index.html
+score 1  doc 330: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-book-of-basketball-the-nba-according-to-the-sports-guy_232/index.html
+score 1  doc 6: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/behind-closed-doors_962/index.html
+score 1  doc 12: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-elephant-tree_968/index.html
+score 1  doc 24: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-her-wake_980/index.html
+score 1  doc 40: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sapiens-a-brief-history-of-humankind_996/index.html
+score 1  doc 53: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/why-the-right-went-wrong-conservatism-from-goldwater-to-the-tea-party-and-beyond_781/index.html
+score 1  doc 96: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-14th-colony-cotton-malone-11_744/index.html
+score 1  doc 97: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-guilty-will-robie-4_750/index.html
+score 1  doc 98: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/you-you-1_784/index.html
+score 1  doc 99: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/biography_36/index.html
+score 1  doc 102: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-faith-of-christopher-hitchens-the-restless-soul-of-the-worlds-most-notorious-atheist_495/index.html
+score 1  doc 145: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/history_32/index.html
+score 1  doc 146: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/house-of-lost-worlds-dinosaurs-dynasties-and-the-story-of-life-on-earth_170/index.html
+score 1  doc 147: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-guns-of-august_254/index.html
+score 1  doc 149: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-hiding-place_406/index.html
+score 1  doc 150: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-mathews-men-seven-brothers-and-the-war-against-hitlers-u-boats_408/index.html
+score 1  doc 151: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/catherine-the-great-portrait-of-a-woman_424/index.html
+score 1  doc 162: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unbound-how-eight-technologies-made-us-human-transformed-society-and-brought-our-world-to-the-brink_950/index.html
+score 1  doc 367: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/orchestra-of-exiles-the-story-of-bronislaw-huberman-the-israel-philharmonic-and-the-one-thousand-jews-he-saved-from-nazi-horrors_337/index.html
+score 1  doc 370: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/kill-em-and-leave-searching-for-james-brown-and-the-american-soul_528/index.html
+score 1  doc 5: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/you-cant-bury-them-all-poems_961/index.html
+--------------------------------------------------------------
+Your query: heller skip or exemplified 
+Found 2 docs. Ranked results: 
+score 2  doc 326: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/icing-aces-hockey-2_25/index.html
+score 1  doc 158: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/zealot-the-life-and-times-of-jesus-of-nazareth_785/index.html
+--------------------------------------------------------------
+Your query: warming and urban conveyed aloud 
+Found 2 docs. Ranked results: 
+score 1  doc 131: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/everyday-italian-125-simple-and-delicious-recipes_618/index.html
+score 1  doc 377: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-genius-of-birds_843/index.html
+--------------------------------------------------------------
+Your query: swellest 
+No matching docs
+--------------------------------------------------------------
+
+# Test on letters
+./fuzzquery ../data/index_outputs/letters-2-indexer 5 2 | ./querier ../data/letters-2 ../data/index_outputs/letters-2-indexer
+./fuzzquery: generating 5 queries from 11 words
+Your query: newsboy 
+No matching docs
+--------------------------------------------------------------
+Your query: playground for or playground or breadth or search breadth 
+Found 2 docs. Ranked results: 
+score 2  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 2  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+--------------------------------------------------------------
+Your query: home home or first 
+Found 3 docs. Ranked results: 
+score 2  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 2  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score 1  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+--------------------------------------------------------------
+Your query: algorithm and algorithm first tse 
+Found 1 docs. Ranked results: 
+score 1  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+--------------------------------------------------------------
+Your query: swellest 
+No matching docs
+--------------------------------------------------------------
+
+# Test on letters with diff # of tests and seed
+./fuzzquery ../data/index_outputs/letters-2-indexer 10 0 | ./querier ../data/letters-2 ../data/index_outputs/letters-2-indexer
+./fuzzquery: generating 10 queries from 11 words
+Your query: page and home 
+Found 1 docs. Ranked results: 
+score 2  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+--------------------------------------------------------------
+Your query: breadth or tse tse or search search 
+Found 2 docs. Ranked results: 
+score 2  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+--------------------------------------------------------------
+Your query: first first or search 
+Found 1 docs. Ranked results: 
+score 2  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+--------------------------------------------------------------
+Your query: endlessly the this or search or curdled or the 
+Found 2 docs. Ranked results: 
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+--------------------------------------------------------------
+Your query: algorithm or this page tse and home or the 
+Found 2 docs. Ranked results: 
+score 3  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+--------------------------------------------------------------
+Your query: home search first this or tse 
+Found 3 docs. Ranked results: 
+score 3  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+--------------------------------------------------------------
+Your query: the 
+Found 1 docs. Ranked results: 
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+--------------------------------------------------------------
+Your query: this tse or the 
+Found 1 docs. Ranked results: 
+score 2  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+--------------------------------------------------------------
+Your query: home 
+Found 3 docs. Ranked results: 
+score 2  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+--------------------------------------------------------------
+Your query: playground or breadth or playground and tse and playground 
+Found 2 docs. Ranked results: 
+score 2  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+--------------------------------------------------------------
+
+# Testing valgrind for letters depth 10
+valgrind --leak-check=full --show-leak-kinds=all -s ./fuzzquery ../data/letters-indexer-10 10 0 | ./querier ../data/letters-10 ../data/letters-indexer-10
+==3814003== Memcheck, a memory error detector
+==3814003== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==3814003== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==3814003== Command: ./fuzzquery ../data/letters-indexer-10 10 0
+==3814003== 
+./fuzzquery: generating 10 queries from 22 words
+==3814003== 
+==3814003== HEAP SUMMARY:
+==3814003==     in use at exit: 0 bytes in 0 blocks
+==3814003==   total heap usage: 104,367 allocs, 104,367 frees, 9,305,206 bytes allocated
+==3814003== 
+==3814003== All heap blocks were freed -- no leaks are possible
+==3814003== 
+==3814003== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+Your query: fast and the 
+Found 1 docs. Ranked results: 
+score 1  doc 7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+--------------------------------------------------------------
+Your query: breadth or graph graph or coding fourier 
+Found 3 docs. Ranked results: 
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score 1  doc 5: http://cs50tse.cs.dartmouth.edu/tse/letters/G.html
+score 1  doc 6: http://cs50tse.cs.dartmouth.edu/tse/letters/H.html
+--------------------------------------------------------------
+Your query: tse first or fourier 
+Found 2 docs. Ranked results: 
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+--------------------------------------------------------------
+Your query: endlessly page depth or fourier or curdled or eniac 
+Found 2 docs. Ranked results: 
+score 1  doc 7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/E.html
+--------------------------------------------------------------
+Your query: computational or this traversal graph and home or page 
+Found 2 docs. Ranked results: 
+score 3  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 9: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+--------------------------------------------------------------
+Your query: the fourier first this or graph 
+Found 2 docs. Ranked results: 
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 5: http://cs50tse.cs.dartmouth.edu/tse/letters/G.html
+--------------------------------------------------------------
+Your query: eniac 
+Found 1 docs. Ranked results: 
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/E.html
+--------------------------------------------------------------
+Your query: depth graph or eniac 
+Found 2 docs. Ranked results: 
+score 1  doc 8: http://cs50tse.cs.dartmouth.edu/tse/letters/D.html
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/E.html
+--------------------------------------------------------------
+Your query: home 
+Found 9 docs. Ranked results: 
+score 2  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/E.html
+score 1  doc 5: http://cs50tse.cs.dartmouth.edu/tse/letters/G.html
+score 1  doc 6: http://cs50tse.cs.dartmouth.edu/tse/letters/H.html
+score 1  doc 7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+score 1  doc 8: http://cs50tse.cs.dartmouth.edu/tse/letters/D.html
+score 1  doc 9: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+--------------------------------------------------------------
+Your query: search or algorithm or biology and huffman and search 
+Found 4 docs. Ranked results: 
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score 1  doc 8: http://cs50tse.cs.dartmouth.edu/tse/letters/D.html
+score 1  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score 1  doc 9: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+--------------------------------------------------------------
+
+# Testing on wikipedia
+./fuzzquery ../data/index_outputs/wikipedia-1-indexer 5 1 | ./querier ../data/wikipedia-1 ../data/index_outputs/wikipedia-1-indexer
+./fuzzquery: generating 5 queries from 6506 words
+Your query: courts and december 
+Found 1 docs. Ranked results: 
+score 45  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+--------------------------------------------------------------
+Your query: idea or thank reasonable or lord green 
+Found 6 docs. Ranked results: 
+score 35  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score 6  doc 3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score 4  doc 5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score 4  doc 7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+score 3  doc 2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score 3  doc 6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+--------------------------------------------------------------
+Your query: typical gracefully or microprocessor 
+Found 4 docs. Ranked results: 
+score 2  doc 3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score 1  doc 6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+score 1  doc 7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+--------------------------------------------------------------
+Your query: endlessly howard url or photo or curdled or electric 
+Found 2 docs. Ranked results: 
+score 2  doc 5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+--------------------------------------------------------------
+Your query: clarification or android wordpress burton and enumerate or athletics 
+Found 3 docs. Ranked results: 
+score 11  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score 3  doc 2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score 2  doc 5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+--------------------------------------------------------------
+
+# Testing with diff # of tests and seed
+./fuzzquery ../data/index_outputs/wikipedia-1-indexer 10 0 | ./querier ../data/wikipedia-1 ../data/index_outputs/wikipedia-1-indexer
+./fuzzquery: generating 10 queries from 6506 words
+Your query: courts and december 
+Found 1 docs. Ranked results: 
+score 45  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+--------------------------------------------------------------
+Your query: idea or thank reasonable or lord green 
+Found 6 docs. Ranked results: 
+score 35  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score 6  doc 3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score 4  doc 5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score 4  doc 7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+score 3  doc 2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score 3  doc 6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+--------------------------------------------------------------
+Your query: typical gracefully or microprocessor 
+Found 4 docs. Ranked results: 
+score 2  doc 3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score 1  doc 6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+score 1  doc 7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+--------------------------------------------------------------
+Your query: endlessly howard url or photo or curdled or electric 
+Found 2 docs. Ranked results: 
+score 2  doc 5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+--------------------------------------------------------------
+Your query: clarification or android wordpress burton and enumerate or athletics 
+Found 3 docs. Ranked results: 
+score 11  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score 3  doc 2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score 2  doc 5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+--------------------------------------------------------------
+Your query: wilson daily opportunities naturally or speeding 
+Found 2 docs. Ranked results: 
+score 2  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score 2  doc 2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+--------------------------------------------------------------
+Your query: phenomenon 
+Found 2 docs. Ranked results: 
+score 1  doc 5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score 1  doc 6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+--------------------------------------------------------------
+Your query: reinterpret depend or able 
+Found 4 docs. Ranked results: 
+score 2  doc 3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score 2  doc 5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score 1  doc 6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+score 1  doc 2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+--------------------------------------------------------------
+Your query: distribute 
+Found 2 docs. Ranked results: 
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score 1  doc 5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+--------------------------------------------------------------
+Your query: alorie or echo or overlooking and journal and expressed 
+Found 6 docs. Ranked results: 
+score 31  doc 4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score 25  doc 7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+score 25  doc 5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score 24  doc 2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score 24  doc 3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score 24  doc 6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+--------------------------------------------------------------
